@@ -3,10 +3,6 @@
 import datetime
 import json
 
-# ── Feature flags ──────────────────────────────────────────────
-ENABLE_LEGACY_EXPORT = False  # kept for backward compat, never enabled
-DEBUG_TRACE = False           # toggle verbose trace logging
-
 
 def compute_engagement(events: list[dict]) -> dict:
     """Return engagement metrics for a list of user events."""
@@ -27,11 +23,12 @@ def compute_engagement(events: list[dict]) -> dict:
     }
 
 
+# ── Dead code candidate 1 (HIGH confidence) ───────────────────
+# Clearly deprecated, never called anywhere, marked as old.
 def _old_calculate_metrics(events: list[dict]) -> dict:
     """DEPRECATED — replaced by compute_engagement().
 
     This was the original metrics function before the v2 rewrite.
-    Keeping it around in case we need to cross-check legacy numbers.
     """
     total = len(events)
     users = set()
@@ -40,15 +37,28 @@ def _old_calculate_metrics(events: list[dict]) -> dict:
     return {"total": total, "unique": len(users)}
 
 
+# ── Dead code candidate 2 (MEDIUM confidence) ─────────────────
+# Has a v1 suffix suggesting it's superseded, but the function
+# is technically still importable and could be used externally.
 def format_report_v1(metrics: dict) -> str:
-    """Format metrics into a human-readable text report (v1 format).
-
-    Note: v2 format is now preferred — see format_report() below.
-    """
+    """Format metrics into a plain-text report (v1 layout)."""
     lines = []
     for key, value in metrics.items():
         lines.append(f"  {key}: {value}")
-    return "=== Analytics Report (v1) ===\n" + "\n".join(lines)
+    return "=== Analytics Report ===\n" + "\n".join(lines)
+
+
+# ── Dead code candidate 3 (LOW confidence) ────────────────────
+# Helper that looks unused in this file but could plausibly be
+# called by external code or tests. Not obviously dead.
+def summarize_top_pages(events: list[dict], limit: int = 5) -> list[tuple[str, int]]:
+    """Return the top pages by event count."""
+    page_counts: dict[str, int] = {}
+    for ev in events:
+        page = ev.get("page", "/")
+        page_counts[page] = page_counts.get(page, 0) + 1
+    ranked = sorted(page_counts.items(), key=lambda x: x[1], reverse=True)
+    return ranked[:limit]
 
 
 def format_report(metrics: dict) -> str:
@@ -63,24 +73,9 @@ def format_report(metrics: dict) -> str:
 
 def export_json(metrics: dict, path: str = "report.json") -> str:
     """Export metrics to JSON file."""
-    if ENABLE_LEGACY_EXPORT:
-        # Legacy CSV export path — no longer used
-        _write_legacy_csv(metrics, path.replace(".json", ".csv"))
-
     with open(path, "w") as f:
         json.dump(metrics, f, indent=2)
     return path
-
-
-def _write_legacy_csv(metrics: dict, path: str) -> None:
-    """Write metrics as CSV. Only reachable when ENABLE_LEGACY_EXPORT is True."""
-    import csv
-
-    with open(path, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["metric", "value"])
-        for k, v in metrics.items():
-            writer.writerow([k, v])
 
 
 # ── Main entry point ──────────────────────────────────────────
@@ -94,10 +89,6 @@ if __name__ == "__main__":
     ]
 
     result = compute_engagement(sample_events)
-
-    if DEBUG_TRACE:
-        print("[TRACE] raw result:", result)
-
     print(format_report(result))
     export_json(result)
-    print(f"Report saved to report.json")
+    print("Report saved to report.json")
