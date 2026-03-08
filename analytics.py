@@ -4,7 +4,6 @@ import datetime
 import json
 
 # ── Feature flags ──────────────────────────────────────────────
-ENABLE_LEGACY_EXPORT = False  # kept for backward compat, never enabled
 DEBUG_TRACE = False           # toggle verbose trace logging
 
 
@@ -63,24 +62,9 @@ def format_report(metrics: dict) -> str:
 
 def export_json(metrics: dict, path: str = "report.json") -> str:
     """Export metrics to JSON file."""
-    if ENABLE_LEGACY_EXPORT:
-        # Legacy CSV export path — no longer used
-        _write_legacy_csv(metrics, path.replace(".json", ".csv"))
-
     with open(path, "w") as f:
         json.dump(metrics, f, indent=2)
     return path
-
-
-def _write_legacy_csv(metrics: dict, path: str) -> None:
-    """Write metrics as CSV. Only reachable when ENABLE_LEGACY_EXPORT is True."""
-    import csv
-
-    with open(path, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["metric", "value"])
-        for k, v in metrics.items():
-            writer.writerow([k, v])
 
 
 # ── Main entry point ──────────────────────────────────────────
