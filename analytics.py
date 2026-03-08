@@ -23,20 +23,6 @@ def compute_engagement(events: list[dict]) -> dict:
     }
 
 
-# ── Dead code candidate 1 (HIGH confidence) ───────────────────
-# Clearly deprecated, never called anywhere, marked as old.
-def _old_calculate_metrics(events: list[dict]) -> dict:
-    """DEPRECATED — replaced by compute_engagement().
-
-    This was the original metrics function before the v2 rewrite.
-    """
-    total = len(events)
-    users = set()
-    for ev in events:
-        users.add(ev.get("user_id"))
-    return {"total": total, "unique": len(users)}
-
-
 # ── Dead code candidate 2 (MEDIUM confidence) ─────────────────
 # Has a v1 suffix suggesting it's superseded, but the function
 # is technically still importable and could be used externally.
