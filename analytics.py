@@ -37,17 +37,6 @@ def _old_calculate_metrics(events: list[dict]) -> dict:
     return {"total": total, "unique": len(users)}
 
 
-# ── Dead code candidate 2 (MEDIUM confidence) ─────────────────
-# Has a v1 suffix suggesting it's superseded, but the function
-# is technically still importable and could be used externally.
-def format_report_v1(metrics: dict) -> str:
-    """Format metrics into a plain-text report (v1 layout)."""
-    lines = []
-    for key, value in metrics.items():
-        lines.append(f"  {key}: {value}")
-    return "=== Analytics Report ===\n" + "\n".join(lines)
-
-
 # ── Dead code candidate 3 (LOW confidence) ────────────────────
 # Helper that looks unused in this file but could plausibly be
 # called by external code or tests. Not obviously dead.
